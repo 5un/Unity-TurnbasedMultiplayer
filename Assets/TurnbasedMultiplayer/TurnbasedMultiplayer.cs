@@ -15,19 +15,18 @@ public class TurnbasedMultiplayer : NetworkSessionManager {
 	const long OPCODE_HOST_GAME_STATE = 101L;
 	const long OPCODE_GUEST_MOVE = 102L;
 
-	void Awake() {
-		base.Awake ();
-		AddOnMatchJoinedAction (OnMatchJoined);
-	}
+	public delegate void OnGameStateUpdated (GameState gameState);
+	public OnGameStateUpdated onGameStateUpdated;
 
 	// Use this for initialization
 	void Start () {
 		gameRule = new GameRule ();
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		base.Update ();
+		onMatchJoined += OnMatchJoined;
+
+		GameTurn turn = JsonUtility.FromJson<GameTurn> ("{\"moves\":[{\"targetRow\":0,\"targetCol\":0}]}");
+		Debug.Log (turn);
+		Debug.Log (JsonUtility.ToJson (turn));
+
 	}
 
 	public void EnterSimulationMode() {
@@ -36,7 +35,7 @@ public class TurnbasedMultiplayer : NetworkSessionManager {
 
 	}
 
-	public void OnMatchJoined() {
+	public void OnMatchJoined(INMatch match) {
 		// Establish a host guest relationship
 		int i = 0;
 		foreach (var participant in _matchParticipants) {
@@ -51,14 +50,20 @@ public class TurnbasedMultiplayer : NetworkSessionManager {
 		if (isHost) {
 			// Establish game state
 			gameState = new GameState();
+			gameState = gameRule.AssignParticipants (gameState, _matchParticipants);
 			SendGameState ();
 		}
 	}
 		
-	public void OnMatchData(INMatchData m) {
+	public override void OnMatchData(INMatchData m) {
 		base.OnMatchData (m);
 		var content = Encoding.UTF8.GetString(m.Data);
+		content = content.Trim ();
+		content.Replace ("\\\"", "\"");
+		// contentData.bytes, 3, contentData.bytes.Length - 3
 
+		Debug.Log ("OnMatchData");
+		Debug.Log (content);
 		// TODO: if it's a multiplayer message, do something with it
 		// TODO: if you are a host an receives moves from guests, resolve them
 		switch (m.OpCode) {
@@ -66,22 +71,42 @@ public class TurnbasedMultiplayer : NetworkSessionManager {
 			GameState newGameState = JsonUtility.FromJson<GameState> (content);
 			//TODO: Update to other game objects in the game
 			gameState = newGameState;
+			onGameStateUpdated (gameState);
 			break;
 		case OPCODE_GUEST_MOVE:
+			Debug.Log ("Received action from guest");
 			if (isHost) {
+				Debug.Log("is host, Parsing");
 				GameTurn turn = JsonUtility.FromJson<GameTurn> (content);
-				gameState = gameRule.ResolveMoves (turn);
+
+
+				Debug.Log("Parsed");
+				Debug.Log (JsonUtility.ToJson (turn));
+
+				gameState = gameRule.ResolveMoves (gameState, turn);
 				SendGameState ();
+				onGameStateUpdated (gameState);
 			}
 			break;
 		default:
-			Debug.LogFormat("User handle '{0}' sent '{1}'", m.Presence.Handle, content);
+			Debug.LogFormat ("User handle '{0}' sent '{1}' '21}'", m.Presence.Handle, m.OpCode, content);
+			break;
 		};
 	}
 
+	public bool CanMakeMoves() {
+		return gameRule.CanMakeMoves (gameState, _session.Id);
+	}
+
 	public void CommitMoves(GameTurn turn) {
-		string json = JsonUtility.ToJson (turn);
-		SendMatchMessage (OPCODE_GUEST_MOVE, json);
+		if (isHost) {
+			gameState = gameRule.ResolveMoves (gameState, turn);
+			SendGameState ();
+			onGameStateUpdated (gameState);
+		} else {
+			string json = JsonUtility.ToJson (turn);
+			SendMatchMessage (OPCODE_GUEST_MOVE, json);
+		}
 	}
 
 	// Send the current game state to all the guests

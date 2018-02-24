@@ -13,8 +13,14 @@ public class NetworkSessionManager : MonoBehaviour {
 	public string serverKey = "defaultkey";
 	public int numMatchParticipants = 2;
 
-	public List<Action> OnSessionConnectedActions;
-	public List<Action> OnMatchJoinedActions;
+	//public List<Action> OnSessionConnectedActions;
+	//public List<Action> OnMatchJoinedActions;
+
+	public delegate void OnSessionConnectedDelegate(INSession session);
+	public delegate void OnMatchJoinedDelegate(INMatch match);
+
+	public OnSessionConnectedDelegate onSessionConnected;
+	public OnMatchJoinedDelegate onMatchJoined;
 
 	protected INClient _client;
 	protected INSession _session;
@@ -25,8 +31,8 @@ public class NetworkSessionManager : MonoBehaviour {
 
 	public NetworkSessionManager() {
 		_executionQueue = new Queue<IEnumerator>(1024);
-		OnSessionConnectedActions = new List<Action> ();
-		OnMatchJoinedActions = new List<Action> ();
+		// OnSessionConnectedActions = new List<Action> ();
+		// OnMatchJoinedActions = new List<Action> ();
 
 	}
 
@@ -89,12 +95,15 @@ public class NetworkSessionManager : MonoBehaviour {
 		_client.Connect(_session, (bool done) => {
 			// We enqueue callbacks which contain code which must be dispatched on
 			// the Unity main thread.
-			foreach(Action a in OnSessionConnectedActions) {
-				a();
-			}
+//			foreach(Action a in OnSessionConnectedActions) {
+//				a();
+//			}
+
+
 			Enqueue(() => {
 				Debug.Log("Session connected.");
 				// Store session for quick reconnects.
+				onSessionConnected(session);
 				PlayerPrefs.SetString("nk.session", session.Token);
 			});
 		});
@@ -167,9 +176,10 @@ public class NetworkSessionManager : MonoBehaviour {
 				Debug.Log("Successfully joined match.");
 				_match = matches.Results[0];
 				_matchParticipants = matchParticipants; 
-				foreach(Action a in OnMatchJoinedActions) {
-					a();
-				}
+//				foreach(Action a in OnMatchJoinedActions) {
+//					a();
+//				}
+
 				foreach(INMatch match in matches.Results) {
 					Debug.LogFormat("Match id: {0} Presence", match.Id);
 
@@ -178,6 +188,10 @@ public class NetworkSessionManager : MonoBehaviour {
 
 					}
 				}
+
+				Enqueue(() => {
+					onMatchJoined(_match);
+				});
 			}, (INError error) => {
 				Debug.LogErrorFormat("Error: code '{0}' with '{1}'.", error.Code, error.Message);
 			});
@@ -200,10 +214,8 @@ public class NetworkSessionManager : MonoBehaviour {
 		});
 	}
 
-	public void OnMatchData(INMatchData m) {
+	public virtual void OnMatchData(INMatchData m) {
 		var content = Encoding.UTF8.GetString(m.Data);
-		Debug.Log ("OnMatchData");
-		Debug.Log (content);
 		switch (m.OpCode) {
 		case 101L:
 			Debug.Log("A custom opcode.");
@@ -214,11 +226,12 @@ public class NetworkSessionManager : MonoBehaviour {
 		};
 	}
 
-	public void AddOnSessionConnectAction(Action action) {
-		OnSessionConnectedActions.Add (action);
-	}
+//	public void AddOnSessionConnectAction(Action action) {
+//		OnSessionConnectedActions.Add (action);
+//	}
+//
+//	public void AddOnMatchJoinedAction(Action action) {
+//		OnMatchJoinedActions.Add (action);
+//	}
 
-	public void AddOnMatchJoinedAction(Action action) {
-		OnMatchJoinedActions.Add (action);
-	}
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Nakama;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -30,8 +31,11 @@ public class MatchMakerUIController : MonoBehaviour {
 		btnLogin.onClick.AddListener (OnBtnLoginClicked);
 		btnStartMatchMaking.onClick.AddListener (OnBtnStartMatchMakingClicked);
 
-		networkSessionManager.AddOnSessionConnectAction(OnSessionConnected);
-		networkSessionManager.AddOnMatchJoinedAction (OnMatchJoined);
+		//networkSessionManager.AddOnSessionConnectAction(OnSessionConnected);
+		//networkSessionManager.AddOnMatchJoinedAction (OnMatchJoined);
+
+		networkSessionManager.onSessionConnected += OnSessionConnected;
+		networkSessionManager.onMatchJoined += OnMatchJoined;
 
 		Reset ();
 	}
@@ -80,7 +84,7 @@ public class MatchMakerUIController : MonoBehaviour {
 
 	}
 
-	public void OnSessionConnected()
+	public void OnSessionConnected(INSession session)
 	{
 		Debug.Log ("On Session Connected");
 		Enqueue (() => 
@@ -92,7 +96,7 @@ public class MatchMakerUIController : MonoBehaviour {
 		);
 	}
 
-	public void OnMatchJoined()
+	public void OnMatchJoined(INMatch match)
 	{
 		Enqueue (() => 
 			{
