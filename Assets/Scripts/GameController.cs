@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class GameController : MonoBehaviour {
 
@@ -10,6 +11,7 @@ public class GameController : MonoBehaviour {
 	public Canvas chatUI;
 	public TurnbasedMultiplayer tbm;
 	public TicTacToeBoard ticTacToeBoard;
+	public Text txtWinner;
 
 	// Use this for initialization
 	void Start () {
@@ -20,6 +22,7 @@ public class GameController : MonoBehaviour {
 		matchMakerUI.enabled = true;
 		gameUI.enabled = false;
 		chatUI.enabled = false;
+		txtWinner.enabled = false;
 	}
 	
 	// Update is called once per frame
@@ -41,10 +44,15 @@ public class GameController : MonoBehaviour {
 	}
 
 	void OnGameStateUpdated(GameState gameState) {
-		Debug.Log ("OnGameStateUpdated");
-		Debug.Log (JsonUtility.ToJson (gameState));
+		if (gameState.stage == 0) {
+			txtWinner.enabled = false;
+			ticTacToeBoard.UpdateBoard (gameState.cells);
+		} else if(gameState.stage == 1) {
+			txtWinner.enabled = true;
+			txtWinner.text = "The Winner is player " + gameState.winner;
+			ticTacToeBoard.UpdateBoard (gameState.cells);
+		}
 
-		ticTacToeBoard.UpdateBoard (gameState.cells);
 	}
 
 	void OnMatchJoined(INMatch match) {

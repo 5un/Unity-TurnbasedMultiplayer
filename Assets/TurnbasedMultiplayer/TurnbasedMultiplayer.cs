@@ -35,10 +35,6 @@ public class TurnbasedMultiplayer : NetworkSessionManager {
 		gameRule = new GameRule ();
 		onMatchJoined += OnMatchJoined;
 
-		GameTurn turn = JsonUtility.FromJson<GameTurn> ("{\"moves\":[{\"targetRow\":0,\"targetCol\":0}]}");
-		Debug.Log (turn);
-		Debug.Log (JsonUtility.ToJson (turn));
-
 	}
 
 	void Update() {
@@ -80,12 +76,9 @@ public class TurnbasedMultiplayer : NetworkSessionManager {
 		base.OnMatchData (m);
 		var content = Encoding.UTF8.GetString(m.Data);
 		content = content.Trim ();
-		content = content.Substring (1, content.Length - 2);
+		//content = content.Substring (1, content.Length - 2);
 		content = content.Replace (@"\", "");
 
-
-		Debug.Log ("OnMatchData");
-		Debug.Log (content);
 		// TODO: if it's a multiplayer message, do something with it
 		// TODO: if you are a host an receives moves from guests, resolve them
 		switch (m.OpCode) {
@@ -98,7 +91,9 @@ public class TurnbasedMultiplayer : NetworkSessionManager {
 			GameState newGameState = JsonUtility.FromJson<GameState> (content);
 			//TODO: Update to other game objects in the game
 			gameState = newGameState;
-			onGameStateUpdated (gameState);
+			Enqueue (() => {
+				onGameStateUpdated (gameState);
+			});
 			break;
 		case OPCODE_GUEST_MOVE:
 			Debug.Log ("Received action from guest");
