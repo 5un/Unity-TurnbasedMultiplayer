@@ -7,6 +7,7 @@ public class GameController : MonoBehaviour {
 
 	public Canvas matchMakerUI;
 	public Canvas gameUI;
+	public Canvas chatUI;
 	public TurnbasedMultiplayer tbm;
 	public TicTacToeBoard ticTacToeBoard;
 
@@ -18,6 +19,7 @@ public class GameController : MonoBehaviour {
 
 		matchMakerUI.enabled = true;
 		gameUI.enabled = false;
+		chatUI.enabled = false;
 	}
 	
 	// Update is called once per frame
@@ -50,6 +52,7 @@ public class GameController : MonoBehaviour {
 		//TODO: hide match maker ui and show ttt
 		gameUI.enabled = true;
 		matchMakerUI.enabled = false;
+		chatUI.enabled = true;
 			
 	}
 

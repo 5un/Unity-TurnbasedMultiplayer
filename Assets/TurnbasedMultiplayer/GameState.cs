@@ -8,6 +8,7 @@ public class GameState
 	public int stage = 0;
 	public int numTurns = 0;
 	public string whoseTurn = "O";
+	public string winner = "";
 
 	public List<string> cells;
 

@@ -36,6 +36,10 @@ public class GameRule
 		{
 			oldState.cells [move.targetRow * 3 + move.targetCol] = oldState.whoseTurn;
 		}
+
+		// Check winner
+
+
 		if (oldState.whoseTurn == "0") 
 		{
 			oldState.whoseTurn = "1";
