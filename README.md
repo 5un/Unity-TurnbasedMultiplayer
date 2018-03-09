@@ -2,13 +2,15 @@
 
 ## Turn-based Protocol Design
 
+## Draft class specifications
+
 ### Game State Object
 
 * stage (String): what is the current state of the game. In some game, there might be a SETUP stage where players have to pick sides and roles.
 * numRounds (Integer): which round it is in the game. A round consists of multiple phases.
 * phase (String): what is the name of the current phase.
 * whoseTurn (Participant Id): whose turn it is in the phase, if applicable.
-* participants (Participant): The players of the game.
+* participants (List of Participant): The players of the game.
 * capabilityCards (List of Cards): 
 * goals (List of String):
 * board (List of Cells):
@@ -18,7 +20,7 @@
 Represents a player in the game
 
 * nakamaUserId (String): User Id in Nakama's session manager
-* country (String): The country or factor the user is playing for
+* country (String): The country or faction the user is playing for
 * cardsOnHand (List of Cards)
 * cardsOnTable (List of Cards)
 * goals (List of String): hardcoded names of goals
@@ -41,8 +43,8 @@ Represents a cell, hex, or territory on the game board.
 
 Represents a card. We could also subclass it into different types.
 
-* name (Float)
-* type (Float)
+* name (String)
+* type (String)
 * description (String)
 * influenceValue (Float)
 * damageValue (Float)
@@ -51,7 +53,7 @@ Represents a card. We could also subclass it into different types.
 
 ### Infrastructure (Class)
 
-Represents a *built* infrastructed on a cell. 
+Represents a *built* infrastructe on a cell. 
 
 * name (String)
 * type (String): millitary | cilivian
