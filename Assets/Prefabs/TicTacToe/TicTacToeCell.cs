@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using System;
 
-public class Cell : MonoBehaviour {
+public class TicTacToeCell : MonoBehaviour {
 
 	public Button button;
 	public GameObject cross1;

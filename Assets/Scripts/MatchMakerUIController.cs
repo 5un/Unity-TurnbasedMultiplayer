@@ -102,6 +102,7 @@ public class MatchMakerUIController : MonoBehaviour {
 			{
 				Debug.Log ("Main thread");
 				txtMatchMakingStatus.text = "Match Joined";
+				this.gameObject.SetActive(false);
 			}
 		);
 	}

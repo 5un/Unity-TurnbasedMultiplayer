@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class TicTacToeBoard : MonoBehaviour {
 
-	public List<Cell> cells;
+	public List<TicTacToeCell> cells;
 	//public GameObject[] cells;
 
 	public delegate void OnCellClicked(int r, int c);

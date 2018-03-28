@@ -4,4 +4,7 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: Assets/TBS Framework/Scenes/Example Scene 1.unity
+    guid: f7a056d52cd2707459be9f19342cf989
